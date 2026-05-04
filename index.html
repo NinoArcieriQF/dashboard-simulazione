@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elezioni Cammarata — Dashboard Simulazione</title>
-<meta name="description" content="Analisi probabilistica e simulazione Monte Carlo delle elezioni comunali di Cammarata (AG). Dashboard interattiva con scenari di affluenza e previsioni.">
+<meta name="description" content="Analisi probabilistica e simulazione Monte Carlo delle elezioni comunali di Cammarata (AG).">
 <link rel="canonical" href="https://ninoarcieriQF.github.io/dashboard-simulazione/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,233 +12,264 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --navy:#0c1b33;
-  --cream:#f9f8f4;
-  --paper:#ffffff;
-  --border:#e2ddd6;
-  --muted:#6b6560;
-  --text:#1a1a1a;
-  --red:#b83232;
-  --blue:#1a6eb5;
-  --red-light:#fdf2f2;
-  --blue-light:#f0f5fb;
-  --gold:#c9a84c;
-  --ff-title:'Playfair Display',Georgia,serif;
-  --ff-body:'DM Sans',system-ui,sans-serif;
+  --navy:#0c1b33;--cream:#f9f8f4;--paper:#fff;--border:#e2ddd6;
+  --muted:#6b6560;--text:#1a1a1a;--red:#b83232;--blue:#1a6eb5;
+  --red-bg:#fdf2f2;--blue-bg:#f0f5fb;--gold:#c9a84c;--green:#1a7a4a;
+  --ff-h:'Playfair Display',Georgia,serif;--ff:'DM Sans',system-ui,sans-serif;
 }
-body{font-family:var(--ff-body);background:var(--cream);color:var(--text);line-height:1.6;font-size:16px;}
+body{font-family:var(--ff);background:var(--cream);color:var(--text);line-height:1.6;font-size:15px;}
+input,select,button{font-family:var(--ff);}
 a{color:inherit;text-decoration:none;}
 
-/* TOPBAR */
-.topbar{background:var(--navy);color:#a8b8cc;font-size:12px;font-weight:300;letter-spacing:.04em;padding:6px 0;text-align:center;}
-.topbar span{color:#e8e0d0;}
+.topbar{background:var(--navy);color:#7a8fa3;font-size:11px;letter-spacing:.05em;padding:5px 0;text-align:center;}
+.topbar b{color:#e8dfc8;}
 
-/* HEADER */
-header{background:var(--navy);border-bottom:3px solid var(--gold);padding:1.5rem 0 1.2rem;}
-.header-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:1.25rem;}
-.comune-badge{width:52px;height:52px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.comune-badge svg{width:28px;height:28px;fill:#0c1b33;}
-.header-text{}
-.header-text .label{font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;}
-.header-text h1{font-family:var(--ff-title);font-size:1.7rem;font-weight:600;color:#ffffff;line-height:1.1;margin-top:2px;}
-.header-text .sub{font-size:13px;color:#8da0b8;margin-top:3px;}
-.header-right{margin-left:auto;text-align:right;}
-.header-right .tag{display:inline-block;background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.35);border-radius:4px;font-size:11px;font-weight:500;letter-spacing:.06em;padding:4px 10px;text-transform:uppercase;}
+header{background:var(--navy);border-bottom:3px solid var(--gold);padding:1.4rem 0 1.1rem;}
+.hdr{max-width:1120px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:1.25rem;}
+.badge{width:50px;height:50px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.badge svg{width:26px;height:26px;}
+.hdr-txt .lbl{font-size:10px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;}
+.hdr-txt h1{font-family:var(--ff-h);font-size:1.65rem;font-weight:600;color:#fff;line-height:1.1;margin-top:2px;}
+.hdr-txt .sub{font-size:13px;color:#8da0b8;margin-top:2px;}
+.hdr-r{margin-left:auto;}
+.tag{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.35);border-radius:4px;font-size:11px;font-weight:500;letter-spacing:.06em;padding:4px 10px;text-transform:uppercase;}
 
-/* NAV */
 nav{background:var(--paper);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
-.nav-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:0;}
-nav a{font-size:13px;font-weight:500;color:var(--muted);padding:13px 18px 11px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
-nav a:hover,nav a.active{color:var(--text);border-bottom-color:var(--navy);}
+.nav-i{max-width:1120px;margin:0 auto;padding:0 1.5rem;display:flex;}
+nav a{font-size:13px;font-weight:500;color:var(--muted);padding:12px 16px 10px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+nav a:hover{color:var(--text);border-bottom-color:var(--navy);}
 
-/* CONTAINER */
-.container{max-width:1100px;margin:0 auto;padding:0 1.5rem;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 1.5rem;}
 
-/* HERO */
-.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border);}
-.hero-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;}
-.hero h2{font-family:var(--ff-title);font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--text);max-width:720px;}
-.hero .hero-desc{font-size:15px;color:var(--muted);margin-top:.8rem;max-width:620px;line-height:1.7;}
-.disclaimer{margin-top:1rem;display:inline-flex;align-items:center;gap:6px;background:#fff8e6;border:1px solid #e8d48a;border-radius:5px;padding:6px 12px;font-size:12px;color:#7a6520;}
+.hero{padding:2.5rem 0 1.8rem;border-bottom:1px solid var(--border);}
+.hero .lbl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+.hero h2{font-family:var(--ff-h);font-size:2.2rem;font-weight:700;line-height:1.15;max-width:700px;}
+.hero p{font-size:14px;color:var(--muted);margin-top:.7rem;max-width:600px;line-height:1.7;}
+.disc{margin-top:.9rem;display:inline-flex;align-items:center;gap:6px;background:#fff8e6;border:1px solid #e8d48a;border-radius:5px;padding:5px 11px;font-size:12px;color:#7a6520;}
 
-/* STATS ROW */
-.stats-row{padding:2rem 0;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;border-bottom:1px solid var(--border);}
-.stat-card{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.25rem;}
-.stat-card .sc-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:.35rem;}
-.stat-card .sc-value{font-family:var(--ff-title);font-size:2rem;font-weight:700;color:var(--text);line-height:1;}
-.stat-card .sc-note{font-size:12px;color:var(--muted);margin-top:.3rem;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1.8rem 0;border-bottom:1px solid var(--border);}
+.kpi{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;}
+.kpi .kl{font-size:12px;color:var(--muted);margin-bottom:.3rem;}
+.kpi .kv{font-family:var(--ff-h);font-size:1.8rem;font-weight:700;line-height:1;}
+.kpi .kn{font-size:12px;color:var(--muted);margin-top:.2rem;}
 
-/* SECTION */
-.section{padding:2.5rem 0;border-bottom:1px solid var(--border);}
-.section-title{font-family:var(--ff-title);font-size:1.5rem;font-weight:600;margin-bottom:.35rem;}
-.section-subtitle{font-size:14px;color:var(--muted);margin-bottom:1.5rem;}
+.section{padding:2.2rem 0;border-bottom:1px solid var(--border);}
+.sec-h{font-family:var(--ff-h);font-size:1.4rem;font-weight:600;margin-bottom:.25rem;}
+.sec-sub{font-size:13px;color:var(--muted);margin-bottom:1.25rem;}
 
-/* CANDIDATI */
-.candidati-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
-.partito-card{background:var(--paper);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.partito-header{padding:.9rem 1.25rem;display:flex;align-items:center;gap:10px;}
-.partito-header.red{background:var(--red-light);border-bottom:3px solid var(--red);}
-.partito-header.blue{background:var(--blue-light);border-bottom:3px solid var(--blue);}
-.partito-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
-.partito-dot.red{background:var(--red);}
-.partito-dot.blue{background:var(--blue);}
-.partito-name{font-weight:500;font-size:15px;}
-.partito-sindaco{margin-left:auto;font-size:13px;color:var(--muted);}
-.candidati-list{padding:1rem 1.25rem;}
-.cand-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px;}
-.cand-row:last-child{border-bottom:none;}
-.cand-row .cand-name{flex:1;font-weight:400;}
-.cand-row.capilista .cand-name{font-weight:500;}
-.cand-row .cand-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;}
-.cand-badge.sindaco{background:#f0f0f0;color:#555;}
-.cand-row input[type=number]{width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:13px;font-family:var(--ff-body);text-align:right;background:var(--cream);color:var(--text);}
-.cand-row input[type=number]:focus{outline:2px solid var(--navy);border-color:transparent;}
-.partito-tot{padding:.75rem 1.25rem;background:var(--cream);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;}
-.partito-tot span:last-child{font-weight:500;color:var(--text);}
+.params-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+.box{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;}
+.box h4{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.pr{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.pr:last-child{margin-bottom:0;}
+.pr label{font-size:13px;flex:1;}
+.pr input[type=text]{border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;background:var(--cream);color:var(--text);width:170px;}
+.pr input[type=number]{border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;background:var(--cream);color:var(--text);width:90px;text-align:right;}
+.pr input:focus{outline:2px solid var(--navy);border-color:transparent;}
+.dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
 
-/* SIMULAZIONE */
-.sim-controls{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.25rem;display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:end;margin-bottom:1.25rem;}
-.ctrl-group label{display:block;font-size:13px;color:var(--muted);font-weight:500;margin-bottom:6px;}
-.ctrl-group select,.ctrl-group input[type=range]{width:100%;}
-.ctrl-group select{border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:14px;font-family:var(--ff-body);background:var(--cream);color:var(--text);}
-.ctrl-group select:focus{outline:2px solid var(--navy);}
-.ctrl-group input[type=range]{accent-color:var(--navy);margin-top:2px;}
-.btn-sim{background:var(--navy);color:#ffffff;border:none;border-radius:7px;padding:0 1.5rem;height:40px;font-size:14px;font-weight:500;font-family:var(--ff-body);cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.scen-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.scen-tbl th{text-align:left;font-weight:500;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--border);font-size:12px;}
+.scen-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);}
+.scen-tbl tr:last-child td{border-bottom:none;}
+.scen-tbl td:first-child{color:var(--text);font-weight:500;}
+.scen-tbl input[type=number]{border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:13px;background:var(--cream);color:var(--text);width:65px;text-align:right;}
+.scen-tbl input:focus{outline:2px solid var(--navy);border-color:transparent;}
+.scen-tbl .qv{color:var(--green);font-weight:500;}
+.row-hi td{background:#f0faf4;}
+
+.liste-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.lcard{background:var(--paper);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.lhdr{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);}
+.lhdr.rh{border-top:3px solid var(--red);background:var(--red-bg);}
+.lhdr.bh{border-top:3px solid var(--blue);background:var(--blue-bg);}
+.lhdr-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.lhdr-top span{font-weight:500;font-size:15px;}
+.lhdr-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.flbl{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.lhdr input[type=text]{border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;background:#fff;color:var(--text);width:100%;}
+.lhdr input:focus{outline:2px solid var(--navy);border-color:transparent;}
+.lbody{padding:1rem 1.25rem;}
+.crow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.crow:last-child{border-bottom:none;}
+.crow input[type=text]{flex:1;border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:13px;background:var(--cream);color:var(--text);}
+.crow input[type=text]:focus{outline:2px solid var(--navy);}
+.cbadge{font-size:9px;font-weight:500;padding:2px 6px;border-radius:3px;background:#e8e4de;color:#555;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;}
+.cvoti{border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:13px;background:var(--cream);color:var(--text);width:70px;text-align:right;}
+.cvoti:focus{outline:2px solid var(--navy);}
+.cdel{background:none;border:none;color:#ccc;cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;}
+.cdel:hover{color:var(--red);}
+.ladd{padding:.6rem 1.25rem;border-top:1px solid var(--border);}
+.btn-add{font-size:12px;color:var(--muted);background:none;border:1px dashed var(--border);border-radius:5px;padding:4px 10px;cursor:pointer;transition:border-color .2s,color .2s;}
+.btn-add:hover{border-color:var(--navy);color:var(--navy);}
+.lfoot{padding:.7rem 1.25rem;background:var(--cream);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;}
+.lfoot span:last-child{font-weight:500;color:var(--text);}
+
+.sim-ctrl{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:end;margin-bottom:1.1rem;}
+.ctrl label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:5px;}
+.ctrl select{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:13px;background:var(--cream);color:var(--text);}
+.ctrl select:focus{outline:2px solid var(--navy);}
+.ctrl input[type=range]{width:100%;accent-color:var(--navy);}
+.btn-sim{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:0 1.4rem;height:38px;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
 .btn-sim:hover{opacity:.85;}
 
-.prob-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem;}
-.prob-card{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;}
-.prob-card .pc-label{font-size:12px;color:var(--muted);margin-bottom:.3rem;}
-.prob-card .pc-value{font-family:var(--ff-title);font-size:2rem;font-weight:700;line-height:1;}
-.pc-value.red{color:var(--red);}
-.pc-value.blue{color:var(--blue);}
+.prob-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.1rem;}
+.pcard{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem;}
+.pcard .pl{font-size:11px;color:var(--muted);margin-bottom:.3rem;}
+.pv{font-family:var(--ff-h);font-size:1.9rem;font-weight:700;line-height:1;}
+.cr{color:var(--red);}.cb{color:var(--blue);}
 
-.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:1.25rem;margin-bottom:1.25rem;}
-.chart-box{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
-.chart-box h4{font-size:14px;font-weight:500;margin-bottom:3px;}
-.chart-box .ch-sub{font-size:12px;color:var(--muted);margin-bottom:10px;}
-.chart-legend{display:flex;gap:14px;margin-bottom:10px;font-size:12px;color:var(--muted);}
-.chart-legend span{display:flex;align-items:center;gap:4px;}
-.leg-dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:1.1rem;margin-bottom:1.1rem;}
+.cbox{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;}
+.cbox h4{font-size:13px;font-weight:500;margin-bottom:2px;}
+.csub{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.leg{display:flex;gap:12px;margin-bottom:8px;font-size:11px;color:var(--muted);flex-wrap:wrap;}
+.leg span{display:flex;align-items:center;gap:4px;}
+.ld{width:10px;height:10px;border-radius:2px;display:inline-block;}
 
-.tabella-dettaglio{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
-.tabella-dettaglio h4{font-size:14px;font-weight:500;margin-bottom:12px;}
-.tab-inner{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-.tab-party-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;}
-.bar-name{min-width:80px;color:var(--text);}
-.bar-track{flex:1;height:6px;background:var(--cream);border-radius:3px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;}
-.bar-fill.red{background:var(--red);}
-.bar-fill.blue{background:var(--blue);}
-.bar-num{min-width:38px;text-align:right;color:var(--muted);font-size:12px;}
+.tab-det{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;}
+.tab-det h4{font-size:13px;font-weight:500;margin-bottom:10px;}
+.tdi{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.tpl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.barr{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:13px;}
+.barn{min-width:100px;color:var(--text);}
+.bart{flex:1;height:5px;background:var(--cream);border-radius:3px;overflow:hidden;}
+.barf{height:100%;border-radius:3px;}
+.barf.r{background:var(--red);}.barf.b{background:var(--blue);}
+.bnum{min-width:36px;text-align:right;color:var(--muted);font-size:12px;}
 
-/* FOOTER */
-footer{background:var(--navy);color:#7a8fa3;padding:2rem 0;margin-top:3rem;font-size:13px;}
-footer .foot-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;}
-footer .foot-note{max-width:600px;line-height:1.6;}
-footer .foot-link{color:var(--gold);font-weight:500;}
+footer{background:var(--navy);color:#7a8fa3;padding:1.8rem 0;margin-top:2.5rem;font-size:13px;}
+.foot-i{max-width:1120px;margin:0 auto;padding:0 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;}
+.foot-i a{color:var(--gold);}
 
-/* RESPONSIVE */
-@media(max-width:768px){
-  .stats-row{grid-template-columns:1fr 1fr;}
-  .candidati-grid{grid-template-columns:1fr;}
-  .sim-controls{grid-template-columns:1fr;}.prob-row{grid-template-columns:1fr 1fr;}
-  .charts-row{grid-template-columns:1fr;}
-  .tab-inner{grid-template-columns:1fr;}
-  .hero h2{font-size:1.8rem;}
-  .header-right{display:none;}
+@media(max-width:800px){
+  .params-grid,.liste-grid,.charts-row,.tdi{grid-template-columns:1fr;}
+  .kpi-row,.prob-row{grid-template-columns:1fr 1fr;}
+  .sim-ctrl{grid-template-columns:1fr;}
+  .hero h2{font-size:1.7rem;}
+  .hdr-r{display:none;}
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">Analisi non ufficiale · Dati aggiornati al <span>Maggio 2026</span> · Comune di Cammarata (AG)</div>
+<div class="topbar">Analisi non ufficiale &nbsp;·&nbsp; Comune di Cammarata (AG) &nbsp;·&nbsp; <b>Tutti i parametri sono modificabili</b></div>
 
 <header>
-  <div class="header-inner">
-    <div class="comune-badge">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  <div class="hdr">
+    <div class="badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0c1b33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
     </div>
-    <div class="header-text">
-      <div class="label">Elezioni Comunali · Sicilia</div>
+    <div class="hdr-txt">
+      <div class="lbl">Elezioni Comunali · Sicilia · Provincia di Agrigento</div>
       <h1>Cammarata (AG)</h1>
-      <div class="sub">Provincia di Agrigento · 4.869 elettori iscritti</div>
+      <div class="sub">Dashboard simulazione probabilistica · Monte Carlo</div>
     </div>
-    <div class="header-right">
-      <div class="tag">Simulazione Monte Carlo</div>
-    </div>
+    <div class="hdr-r"><div class="tag">Analisi non ufficiale</div></div>
   </div>
 </header>
 
 <nav>
-  <div class="nav-inner">
-    <a href="#simulazione" class="active">Simulazione</a>
+  <div class="nav-i">
+    <a href="#parametri">Parametri</a>
     <a href="#candidati">Candidati</a>
-    <a href="#scenari">Scenari</a>
+    <a href="#simulazione">Simulazione</a>
   </div>
 </nav>
 
-<div class="container">
+<div class="wrap">
 
   <section class="hero">
-    <div class="hero-label">Analisi probabilistica · Elezioni comunali</div>
+    <div class="lbl">Simulazione statistica · Elezioni comunali</div>
     <h2>Chi vincerà il Comune di Cammarata?</h2>
-    <p class="hero-desc">Simulazione statistica basata su 10.000 scenari generati con metodo Monte Carlo. I voti di ciascun candidato sono modellati come variabili aleatorie con distribuzione normale. Aggiorna le stime e simula in tempo reale.</p>
-    <div class="disclaimer">
-      ⚠ Analisi statistica non ufficiale — i dati inseriti sono stime. Nessuna affiliazione con il Comune o i partiti.
+    <p>Modifica liberamente tutti i parametri — elettori, affluenza, bianche/nulle, voti per candidato — e lancia la simulazione Monte Carlo (10.000 scenari) per vedere le probabilità di vittoria in tempo reale.</p>
+    <div class="disc">&#9888; Analisi statistica non ufficiale. I dati sono stime soggettive. Nessuna affiliazione con Comune o liste.</div>
+  </section>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kl">Elettori iscritti</div><div class="kv" id="kpi-el">4.869</div><div class="kn">Comune di Cammarata</div></div>
+    <div class="kpi"><div class="kl">Liste in competizione</div><div class="kv">2</div><div class="kn" id="kpi-liste">Mangiapane vs Traina</div></div>
+    <div class="kpi"><div class="kl">Bianche/nulle stimate</div><div class="kv" id="kpi-bn">2,91%</div><div class="kn">Stima storica</div></div>
+    <div class="kpi"><div class="kl">Scenari simulati</div><div class="kv">10K</div><div class="kn">5 fasce di affluenza</div></div>
+  </div>
+
+  <!-- PARAMETRI -->
+  <section class="section" id="parametri">
+    <div class="sec-h">Parametri della simulazione</div>
+    <div class="sec-sub">Modifica nomi liste, elettori iscritti, percentuale bianche/nulle e le cinque fasce di affluenza. Tutto si ricalcola in automatico.</div>
+
+    <div class="params-grid">
+      <div class="box">
+        <h4>Nomi liste e candidati sindaco</h4>
+        <div class="pr"><div class="dot" style="background:var(--red)"></div><label>Lista A — nome</label><input type="text" id="nomeLA" value="Costruire Orizzonti" oninput="syncNomi()"></div>
+        <div class="pr"><div class="dot" style="background:var(--red)"></div><label>Lista A — sindaco</label><input type="text" id="nomeSA" value="Giuseppe Mangiapane" oninput="syncNomi()"></div>
+        <div class="pr"><div class="dot" style="background:var(--blue)"></div><label>Lista B — nome</label><input type="text" id="nomeLB" value="Idea Comune" oninput="syncNomi()"></div>
+        <div class="pr"><div class="dot" style="background:var(--blue)"></div><label>Lista B — sindaco</label><input type="text" id="nomeSB" value="Giuliano Traina" oninput="syncNomi()"></div>
+      </div>
+      <div class="box">
+        <h4>Parametri base</h4>
+        <div class="pr"><label>Elettori iscritti</label><input type="number" id="el" value="4869" min="100" max="99999" step="1" oninput="ricalcola()"></div>
+        <div class="pr"><label>Schede bianche/nulle (%)</label><input type="number" id="bn" value="2.91" min="0" max="20" step="0.01" oninput="ricalcola()"></div>
+        <div style="margin-top:12px;padding:9px 11px;background:#f0faf4;border:1px solid #a8d8be;border-radius:7px;font-size:12px;color:#1a7a4a;line-height:1.65;">
+          Voti validi = Votanti &minus; Bianche/nulle<br>
+          Quota vittoria = Voti validi &divide; 2 + 1
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <h4>Scenari di affluenza — modifica le percentuali</h4>
+      <div style="overflow-x:auto;margin-top:6px;">
+        <table class="scen-tbl">
+          <thead>
+            <tr>
+              <th>Scenario</th><th>Affluenza %</th><th>Votanti</th><th>Bianche/nulle</th><th>Voti validi</th><th>Quota vittoria</th>
+            </tr>
+          </thead>
+          <tbody id="scen-body"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="sc-label">Elettori iscritti</div>
-      <div class="sc-value">4.869</div>
-      <div class="sc-note">Comune di Cammarata</div>
-    </div>
-    <div class="stat-card">
-      <div class="sc-label">Liste in competizione</div>
-      <div class="sc-value">2</div>
-      <div class="sc-note">Partito A vs Partito B</div>
-    </div>
-    <div class="stat-card">
-      <div class="sc-label">Bianche / nulle stimate</div>
-      <div class="sc-value">2,91%</div>
-      <div class="sc-note">Stima storica</div>
-    </div>
-    <div class="stat-card">
-      <div class="sc-label">Scenari simulati</div>
-      <div class="sc-value">10K</div>
-      <div class="sc-note">5 fasce di affluenza</div>
-    </div>
-  </div>
-
   <!-- CANDIDATI -->
   <section class="section" id="candidati">
-    <h3 class="section-title">Le liste</h3>
-    <p class="section-subtitle">Modifica i voti stimati per aggiornare la simulazione. I valori rappresentano le aspettative di voto per singolo candidato.</p>
-    <div class="candidati-grid">
+    <div class="sec-h">Le liste e i candidati</div>
+    <div class="sec-sub">Modifica nomi e voti stimati per ciascun candidato. Puoi aggiungere o rimuovere candidati con i pulsanti in fondo.</div>
+    <div class="liste-grid">
 
-      <div class="partito-card">
-        <div class="partito-header red">
-          <div class="partito-dot red"></div>
-          <span class="partito-name">Partito A</span>
-          <!-- SOSTITUISCI con il vero nome della lista -->
-          <span class="partito-sindaco">Candidato sindaco: Viola</span>
+      <div class="lcard">
+        <div class="lhdr rh">
+          <div class="lhdr-top">
+            <div class="dot" style="background:var(--red)"></div>
+            <span id="hdrLA">Costruire Orizzonti</span>
+          </div>
+          <div class="lhdr-inputs">
+            <div><div class="flbl">Nome lista</div><input type="text" id="hlLA" value="Costruire Orizzonti" oninput="document.getElementById('nomeLA').value=this.value;syncNomi()"></div>
+            <div><div class="flbl">Candidato sindaco</div><input type="text" id="hlSA" value="Giuseppe Mangiapane" oninput="document.getElementById('nomeSA').value=this.value;syncNomi()"></div>
+          </div>
         </div>
-        <div class="candidati-list" id="listA"></div>
-        <div class="partito-tot"><span>Voti stimati totali</span><span id="totA">1.850</span></div>
+        <div class="lbody" id="listA"></div>
+        <div class="ladd"><button class="btn-add" onclick="addCand('A')">+ Aggiungi candidato</button></div>
+        <div class="lfoot"><span>Voti stimati totali</span><span id="totA">1.850</span></div>
       </div>
 
-      <div class="partito-card">
-        <div class="partito-header blue">
-          <div class="partito-dot blue"></div>
-          <span class="partito-name">Partito B</span>
-          <!-- SOSTITUISCI con il vero nome della lista -->
-          <span class="partito-sindaco">Candidato sindaco: Giuliano</span>
+      <div class="lcard">
+        <div class="lhdr bh">
+          <div class="lhdr-top">
+            <div class="dot" style="background:var(--blue)"></div>
+            <span id="hdrLB">Idea Comune</span>
+          </div>
+          <div class="lhdr-inputs">
+            <div><div class="flbl">Nome lista</div><input type="text" id="hlLB" value="Idea Comune" oninput="document.getElementById('nomeLB').value=this.value;syncNomi()"></div>
+            <div><div class="flbl">Candidato sindaco</div><input type="text" id="hlSB" value="Giuliano Traina" oninput="document.getElementById('nomeSB').value=this.value;syncNomi()"></div>
+          </div>
         </div>
-        <div class="candidati-list" id="listB"></div>
-        <div class="partito-tot"><span>Voti stimati totali</span><span id="totB">1.950</span></div>
+        <div class="lbody" id="listB"></div>
+        <div class="ladd"><button class="btn-add" onclick="addCand('B')">+ Aggiungi candidato</button></div>
+        <div class="lfoot"><span>Voti stimati totali</span><span id="totB">1.950</span></div>
       </div>
 
     </div>
@@ -246,208 +277,275 @@ footer .foot-link{color:var(--gold);font-weight:500;}
 
   <!-- SIMULAZIONE -->
   <section class="section" id="simulazione">
-    <h3 class="section-title">Simulazione probabilistica</h3>
-    <p class="section-subtitle">Monte Carlo con rumore gaussiano sui voti di ciascun candidato. Scegli lo scenario di affluenza e il grado di incertezza.</p>
+    <div class="sec-h">Simulazione Monte Carlo</div>
+    <div class="sec-sub">10.000 scenari con rumore gaussiano (Box-Muller) sui voti di ogni singolo candidato. Scegli scenario e livello di incertezza.</div>
 
-    <div class="sim-controls">
-      <div class="ctrl-group">
-        <label>Scenario affluenza</label>
-        <select id="scenario">
-          <option value="0">Minima — 70% (quota 1.656)</option>
-          <option value="1">Intermedia — 72,5% (quota 1.715)</option>
-          <option value="2" selected>Media — 75% (quota 1.774)</option>
-          <option value="3">Intermedia — 77,5% (quota 1.833)</option>
-          <option value="4">Massima — 80% (quota 1.892)</option>
-        </select>
-      </div>
-      <div class="ctrl-group">
-        <label>Incertezza σ: <strong id="sigmaLabel">12%</strong></label>
-        <input type="range" id="sigma" min="5" max="30" value="12" step="1">
-      </div>
-      <button class="btn-sim" id="btnSimula">Simula 10.000 scenari</button>
+    <div class="sim-ctrl">
+      <div class="ctrl"><label>Scenario affluenza</label><select id="scenSel" onchange="highlightScen()"></select></div>
+      <div class="ctrl"><label>Incertezza &sigma;: <b id="sigLbl">12%</b></label><input type="range" id="sigma" min="2" max="30" value="12" step="1" oninput="document.getElementById('sigLbl').textContent=this.value+'%'"></div>
+      <button class="btn-sim" onclick="simula()">Simula 10.000 scenari</button>
     </div>
 
     <div class="prob-row">
-      <div class="prob-card"><div class="pc-label">P(vittoria A)</div><div class="pc-value red" id="probA">—</div></div>
-      <div class="prob-card"><div class="pc-label">P(vittoria B)</div><div class="pc-value blue" id="probB">—</div></div>
-      <div class="prob-card"><div class="pc-label">Vantaggio atteso</div><div class="pc-value" id="vantaggio" style="color:var(--text)">—</div></div>
-      <div class="prob-card"><div class="pc-label">Quota vittoria</div><div class="pc-value" id="quotaVitt" style="color:var(--text);font-size:1.6rem">—</div></div>
+      <div class="pcard"><div class="pl">P(vittoria <span id="lb-a">Mangiapane</span>)</div><div class="pv cr" id="pA">—</div></div>
+      <div class="pcard"><div class="pl">P(vittoria <span id="lb-b">Traina</span>)</div><div class="pv cb" id="pB">—</div></div>
+      <div class="pcard"><div class="pl">Vantaggio atteso</div><div class="pv" id="pV" style="color:var(--text)">—</div></div>
+      <div class="pcard"><div class="pl">Quota vittoria</div><div class="pv" id="pQ" style="color:var(--text);font-size:1.5rem">—</div></div>
     </div>
 
     <div class="charts-row">
-      <div class="chart-box">
-        <h4>Distribuzione differenza voti A − B</h4>
-        <div class="ch-sub">Da 10.000 simulazioni · positivo = A avanza · negativo = B avanza</div>
-        <div class="chart-legend">
-          <span><span class="leg-dot" style="background:var(--blue)"></span>B avanza</span>
-          <span><span class="leg-dot" style="background:var(--red)"></span>A avanza</span>
+      <div class="cbox">
+        <h4>Distribuzione differenza voti A &minus; B</h4>
+        <div class="csub">10.000 simulazioni · &gt; 0 avanza A · &lt; 0 avanza B</div>
+        <div class="leg">
+          <span><span class="ld" style="background:var(--blue)"></span>B avanza</span>
+          <span><span class="ld" style="background:var(--red)"></span>A avanza</span>
         </div>
         <div style="position:relative;width:100%;height:220px;">
-          <canvas id="chartDiff" role="img" aria-label="Istogramma della differenza voti A meno B da simulazione Monte Carlo">Differenza voti simulata.</canvas>
+          <canvas id="chartD" role="img" aria-label="Istogramma differenza voti A meno B dalle simulazioni Monte Carlo">Differenza voti simulata.</canvas>
         </div>
       </div>
-      <div class="chart-box" id="scenari">
+      <div class="cbox">
         <h4>Voti attesi per scenario</h4>
-        <div class="ch-sub">Valore atteso senza rumore + quota vittoria</div>
-        <div class="chart-legend">
-          <span><span class="leg-dot" style="background:var(--red)"></span>A</span>
-          <span><span class="leg-dot" style="background:var(--blue)"></span>B</span>
+        <div class="csub">Valore atteso senza rumore + quota vittoria</div>
+        <div class="leg">
+          <span><span class="ld" style="background:var(--red)"></span>Lista A</span>
+          <span><span class="ld" style="background:var(--blue)"></span>Lista B</span>
           <span><span style="width:14px;height:2px;background:#888;display:inline-block;"></span>Quota</span>
         </div>
         <div style="position:relative;width:100%;height:220px;">
-          <canvas id="chartScenari" role="img" aria-label="Voti attesi per i 5 scenari di affluenza con quota di vittoria">Scenari affluenza.</canvas>
+          <canvas id="chartS" role="img" aria-label="Voti attesi per i 5 scenari di affluenza con quota vittoria">Scenari affluenza.</canvas>
         </div>
       </div>
     </div>
 
-    <div class="tabella-dettaglio">
+    <div class="tab-det">
       <h4>Dettaglio per candidato — scenario selezionato</h4>
-      <div class="tab-inner" id="tabellaDettaglio">
+      <div class="tdi" id="tabD">
         <div style="font-size:13px;color:var(--muted);grid-column:1/-1;">Clicca "Simula" per visualizzare il dettaglio per candidato.</div>
       </div>
     </div>
-
   </section>
 
 </div>
 
 <footer>
-  <div class="foot-inner">
-    <div class="foot-note">
-      Analisi statistica non ufficiale realizzata a scopo informativo. I dati inseriti sono stime e non rappresentano risultati elettorali certificati. Il modello utilizza il metodo Monte Carlo con distribuzione normale (Box-Muller). Fonte codice: <a class="foot-link" href="https://github.com/NinoArcieriQF/dashboard-simulazione" target="_blank">github.com/NinoArcieriQF/dashboard-simulazione</a>
+  <div class="foot-i">
+    <div style="max-width:600px;line-height:1.6;">
+      Analisi statistica non ufficiale a scopo informativo. I dati sono stime soggettive. Modello: Monte Carlo con distribuzione normale (Box-Muller). &nbsp;
+      <a href="https://github.com/NinoArcieriQF/dashboard-simulazione" target="_blank">github.com/NinoArcieriQF/dashboard-simulazione</a>
     </div>
-    <div>Comune di Cammarata (AG) · Sicilia</div>
+    <div>Cammarata (AG) · Sicilia</div>
   </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const SCENARI=[
-  {label:'70%',validi:3309.3,quota:1655.65},
-  {label:'72.5%',validi:3427.025,quota:1714.5125},
-  {label:'75%',validi:3545.75,quota:1773.875},
-  {label:'77.5%',validi:3663.475,quota:1832.7375},
-  {label:'80%',validi:3782.2,quota:1892.1}
+/* ── STATO ── */
+let SC=[
+  {lbl:'Minima',pct:70},{lbl:'Intermedia bassa',pct:72.5},
+  {lbl:'Media',pct:75},{lbl:'Intermedia alta',pct:77.5},{lbl:'Massima',pct:80}
 ];
-let cA=[{n:'Viola',v:550},{n:'Tomasino',v:350},{n:'Loria',v:350},{n:'Reina',v:300},{n:'Tuzzolino',v:250},{n:'Madonia',v:50}];
-let cB=[{n:'Giuliano',v:600},{n:'Giambrone',v:400},{n:'Cigno',v:400},{n:'Gaetano',v:300},{n:'Martiaddu',v:200},{n:'Rappisi',v:50}];
-let chartDiffInst=null,chartScenInst=null;
+let cA=[
+  {n:'Giuseppe Mangiapane',v:550},{n:'Tomasino',v:350},{n:'Loria',v:350},
+  {n:'Reina',v:300},{n:'Tuzzolino',v:250},{n:'Madonia',v:50}
+];
+let cB=[
+  {n:'Giuliano Traina',v:600},{n:'Giambrone',v:400},{n:'Cigno',v:400},
+  {n:'Gaetano',v:300},{n:'Martiaddu',v:200},{n:'Rappisi',v:50}
+];
+let CD=null,CS=null;
 
-function gauss(m,s){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
-function sumA(){return cA.reduce((s,c)=>s+c.v,0);}
-function sumB(){return cB.reduce((s,c)=>s+c.v,0);}
+/* ── RICALCOLA SCENARI ── */
+function getEl(){return parseFloat(document.getElementById('el').value)||4869;}
+function getBn(){return parseFloat(document.getElementById('bn').value)||2.91;}
 
+function ricalcola(){
+  const el=getEl(),bnr=getBn()/100;
+  SC.forEach((s,i)=>{
+    const inp=document.getElementById('aff_'+i);
+    if(inp){const v=parseFloat(inp.value);if(!isNaN(v)&&v>0)s.pct=v;}
+    const vot=el*s.pct/100;
+    s.votanti=Math.round(vot);
+    s.blanks=Math.round(vot*bnr);
+    s.validi=Math.round(vot*(1-bnr));
+    s.quota=s.validi/2+1;
+  });
+  renderTabScen();
+  aggiornaSelect();
+  buildCS();
+  document.getElementById('kpi-el').textContent=Math.round(el).toLocaleString('it-IT');
+  document.getElementById('kpi-bn').textContent=getBn().toFixed(2).replace('.',',')+'%';
+}
+
+function renderTabScen(){
+  const si=parseInt(document.getElementById('scenSel').value||2);
+  document.getElementById('scen-body').innerHTML=SC.map((s,i)=>`
+    <tr class="${i===si?'row-hi':''}">
+      <td>${s.lbl}</td>
+      <td><input type="number" id="aff_${i}" value="${s.pct}" min="50" max="100" step="0.5"
+        style="border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:13px;background:var(--cream);color:var(--text);text-align:right;width:65px;"
+        oninput="SC[${i}].pct=parseFloat(this.value)||SC[${i}].pct;ricalcola();"></td>
+      <td>${(s.votanti||0).toLocaleString('it-IT')}</td>
+      <td>${(s.blanks||0).toLocaleString('it-IT')}</td>
+      <td><b>${(s.validi||0).toLocaleString('it-IT')}</b></td>
+      <td class="qv">${Math.round(s.quota||0).toLocaleString('it-IT')}</td>
+    </tr>`).join('');
+}
+
+function aggiornaSelect(){
+  const sel=document.getElementById('scenSel'),cur=parseInt(sel.value||2);
+  sel.innerHTML=SC.map((s,i)=>`<option value="${i}"${i===cur?' selected':''}>${s.lbl} — ${s.pct}% (quota ${Math.round(s.quota||0).toLocaleString('it-IT')})</option>`).join('');
+}
+
+function highlightScen(){renderTabScen();}
+
+/* ── NOMI ── */
+function syncNomi(){
+  const nA=document.getElementById('nomeLA').value;
+  const nB=document.getElementById('nomeLB').value;
+  const sA=document.getElementById('nomeSA').value;
+  const sB=document.getElementById('nomeSB').value;
+  ['hdrLA','hlLA'].forEach(id=>{const el=document.getElementById(id);if(el){if(el.tagName==='INPUT')el.value=nA;else el.textContent=nA;}});
+  ['hdrLB','hlLB'].forEach(id=>{const el=document.getElementById(id);if(el){if(el.tagName==='INPUT')el.value=nB;else el.textContent=nB;}});
+  document.getElementById('hlSA').value=sA;
+  document.getElementById('hlSB').value=sB;
+  const sAN=sA.split(' ').slice(-1)[0];
+  const sBN=sB.split(' ').slice(-1)[0];
+  document.getElementById('kpi-liste').textContent=sAN+' vs '+sBN;
+  document.getElementById('lb-a').textContent=sAN;
+  document.getElementById('lb-b').textContent=sBN;
+  if(cA.length>0)cA[0].n=sA;
+  if(cB.length>0)cB[0].n=sB;
+  renderListe();
+}
+
+/* ── CANDIDATI ── */
 function renderListe(){
   ['A','B'].forEach(p=>{
     const arr=p==='A'?cA:cB;
-    const col=p==='A'?'var(--red)':'var(--blue)';
     document.getElementById('list'+p).innerHTML=arr.map((c,i)=>`
-      <div class="cand-row${i===0?' capilista':''}">
-        <span class="cand-name">${c.n}</span>
-        ${i===0?'<span class="cand-badge sindaco">Sindaco</span>':''}
-        <input type="number" min="0" max="2000" step="10" value="${c.v}"
-          oninput="aggVoti('${p}',${i},this.value)">
+      <div class="crow">
+        <input type="text" value="${c.n}" oninput="(${p==='A'?'cA':'cB'})[${i}].n=this.value"
+          placeholder="Nome candidato"${i===0?' style="font-weight:500"':''}>
+        ${i===0?'<span class="cbadge">Sindaco</span>':''}
+        <input type="number" class="cvoti" min="0" max="9999" step="10" value="${c.v}"
+          oninput="updV('${p}',${i},this.value)">
+        ${i>0?`<button class="cdel" onclick="delCand('${p}',${i})">&times;</button>`:'<span style="width:22px"></span>'}
       </div>`).join('');
   });
-  aggTot();
+  aggTot();buildCS();
 }
 
-function aggVoti(p,i,val){
-  const v=Math.max(0,parseInt(val)||0);
-  if(p==='A')cA[i].v=v;else cB[i].v=v;
-  aggTot();buildChartScenari();
+function updV(p,i,v){
+  const n=Math.max(0,parseInt(v)||0);
+  if(p==='A')cA[i].v=n;else cB[i].v=n;
+  aggTot();buildCS();
 }
-
 function aggTot(){
-  document.getElementById('totA').textContent=sumA().toLocaleString('it-IT');
-  document.getElementById('totB').textContent=sumB().toLocaleString('it-IT');
+  document.getElementById('totA').textContent=cA.reduce((s,c)=>s+c.v,0).toLocaleString('it-IT');
+  document.getElementById('totB').textContent=cB.reduce((s,c)=>s+c.v,0).toLocaleString('it-IT');
+}
+function addCand(p){
+  if(p==='A')cA.push({n:'Nuovo candidato',v:0});
+  else cB.push({n:'Nuovo candidato',v:0});
+  renderListe();
+}
+function delCand(p,i){
+  if(p==='A')cA.splice(i,1);else cB.splice(i,1);
+  renderListe();
 }
 
-function buildChartScenari(){
-  const tA=sumA(),tB=sumB(),tot=tA+tB;
-  const vA=SCENARI.map(s=>Math.round(tA*s.validi/tot));
-  const vB=SCENARI.map(s=>Math.round(tB*s.validi/tot));
-  const qArr=SCENARI.map(s=>Math.round(s.quota));
-  const ctx=document.getElementById('chartScenari').getContext('2d');
-  if(chartScenInst)chartScenInst.destroy();
-  chartScenInst=new Chart(ctx,{
-    data:{labels:SCENARI.map(s=>s.label),datasets:[
-      {type:'bar',label:'A',data:vA,backgroundColor:'#b83232',borderWidth:0},
-      {type:'bar',label:'B',data:vB,backgroundColor:'#1a6eb5',borderWidth:0},
-      {type:'line',label:'Quota',data:qArr,borderColor:'#888',borderWidth:2,pointRadius:3,fill:false,tension:0}
+/* ── CHART SCENARI ── */
+function buildCS(){
+  const tA=cA.reduce((s,c)=>s+c.v,0),tB=cB.reduce((s,c)=>s+c.v,0),tot=tA+tB;
+  if(!tot)return;
+  const vA=SC.map(s=>Math.round(tA*(s.validi||0)/tot));
+  const vB=SC.map(s=>Math.round(tB*(s.validi||0)/tot));
+  const qA=SC.map(s=>Math.round(s.quota||0));
+  const ctx=document.getElementById('chartS').getContext('2d');
+  if(CS)CS.destroy();
+  CS=new Chart(ctx,{
+    data:{labels:SC.map(s=>s.pct+'%'),datasets:[
+      {type:'bar',label:'Lista A',data:vA,backgroundColor:'#b83232',borderWidth:0},
+      {type:'bar',label:'Lista B',data:vB,backgroundColor:'#1a6eb5',borderWidth:0},
+      {type:'line',label:'Quota',data:qA,borderColor:'#888',borderWidth:2,pointRadius:3,fill:false,tension:0}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>i.dataset.label+': '+i.raw.toLocaleString('it-IT')}}},
-      scales:{
-        x:{ticks:{font:{size:11}},grid:{display:false}},
-        y:{ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,.06)'}}
-      }}
+      scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,.06)'}}}}
   });
 }
 
-function eseguiSimulazione(){
-  const si=parseInt(document.getElementById('scenario').value);
-  const sigma=parseInt(document.getElementById('sigma').value)/100;
-  const scen=SCENARI[si];
-  const tot=sumA()+sumB();
-  const sf=scen.validi/tot;
-  const N=10000;
+/* ── MONTE CARLO ── */
+function gauss(m,s){
+  let u=0,v=0;
+  while(!u)u=Math.random();while(!v)v=Math.random();
+  return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function simula(){
+  const si=parseInt(document.getElementById('scenSel').value);
+  const sig=parseInt(document.getElementById('sigma').value)/100;
+  const sc=SC[si];
+  if(!sc||!sc.validi){alert('Ricalcola prima gli scenari (sezione Parametri).');return;}
+  const tA=cA.reduce((s,c)=>s+c.v,0),tB=cB.reduce((s,c)=>s+c.v,0),tot=tA+tB;
+  if(!tot){alert('Inserisci i voti dei candidati.');return;}
+  const sf=sc.validi/tot,quota=sc.quota,N=10000;
   let wA=0,wB=0;
   const diffs=[],arrA=[],arrB=[];
   for(let i=0;i<N;i++){
     let sA=0,sB=0;
-    cA.forEach(c=>{const b=c.v*sf;sA+=Math.max(0,gauss(b,sigma*b));});
-    cB.forEach(c=>{const b=c.v*sf;sB+=Math.max(0,gauss(b,sigma*b));});
-    if(sA>scen.quota)wA++;else if(sB>scen.quota)wB++;
+    cA.forEach(c=>{const b=c.v*sf;sA+=Math.max(0,gauss(b,sig*b));});
+    cB.forEach(c=>{const b=c.v*sf;sB+=Math.max(0,gauss(b,sig*b));});
+    if(sA>quota)wA++;else if(sB>quota)wB++;
     diffs.push(sA-sB);arrA.push(sA);arrB.push(sB);
   }
   const pA=(wA/N*100).toFixed(1),pB=(wB/N*100).toFixed(1);
   const mA=arrA.reduce((a,b)=>a+b,0)/N,mB=arrB.reduce((a,b)=>a+b,0)/N;
-  const diff=mA-mB;
-  document.getElementById('probA').textContent=pA+'%';
-  document.getElementById('probB').textContent=pB+'%';
-  const vel=document.getElementById('vantaggio');
-  vel.textContent=(diff>0?'+':'')+Math.round(diff)+' ('+(diff>0?'A':'B')+')';
-  vel.style.color=diff>0?'var(--red)':'var(--blue)';
-  document.getElementById('quotaVitt').textContent=Math.round(scen.quota).toLocaleString('it-IT');
-  const bSize=30,buckets={};
-  diffs.forEach(d=>{const b=Math.floor(d/bSize)*bSize;buckets[b]=(buckets[b]||0)+1;});
-  const keys=Object.keys(buckets).map(Number).sort((a,b)=>a-b);
-  const ctx=document.getElementById('chartDiff').getContext('2d');
-  if(chartDiffInst)chartDiffInst.destroy();
-  chartDiffInst=new Chart(ctx,{type:'bar',
-    data:{labels:keys.map(k=>String(k)),datasets:[{data:keys.map(k=>buckets[k]),
+  const dif=mA-mB;
+  document.getElementById('pA').textContent=pA+'%';
+  document.getElementById('pB').textContent=pB+'%';
+  const pvel=document.getElementById('pV');
+  pvel.textContent=(dif>0?'+':'')+Math.round(dif)+' ('+(dif>0?'A':'B')+')';
+  pvel.style.color=dif>0?'var(--red)':'var(--blue)';
+  document.getElementById('pQ').textContent=Math.round(quota).toLocaleString('it-IT');
+
+  const bSz=30,bk={};
+  diffs.forEach(d=>{const b=Math.floor(d/bSz)*bSz;bk[b]=(bk[b]||0)+1;});
+  const keys=Object.keys(bk).map(Number).sort((a,b)=>a-b);
+  const ctx=document.getElementById('chartD').getContext('2d');
+  if(CD)CD.destroy();
+  CD=new Chart(ctx,{type:'bar',
+    data:{labels:keys.map(k=>String(k)),datasets:[{data:keys.map(k=>bk[k]),
       backgroundColor:keys.map(k=>k>=0?'#b83232':'#1a6eb5'),borderWidth:0,barPercentage:1,categoryPercentage:.95}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>'diff: '+i[0].label+' voti',label:i=>i.raw+' sim. ('+((i.raw/N)*100).toFixed(1)+'%)'}}},
-      scales:{x:{ticks:{font:{size:10},maxTicksLimit:12},grid:{display:false}},y:{ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.06)'}}}}
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:i=>'diff: '+i[0].label+' voti',
+        label:i=>i.raw+' sim. ('+((i.raw/N)*100).toFixed(1)+'%)'
+      }}},
+      scales:{x:{ticks:{font:{size:10},maxTicksLimit:12},grid:{display:false}},
+              y:{ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.06)'}}}}
   });
-  buildTabella(sf,scen);
-}
 
-function buildTabella(sf,scen){
-  const maxA=Math.max(...cA.map(c=>Math.round(c.v*sf)));
-  const maxB=Math.max(...cB.map(c=>Math.round(c.v*sf)));
-  const makeRows=(arr,col,colClass,mx)=>arr.map(c=>{
-    const att=Math.round(c.v*sf);
-    const w=mx>0?Math.round(att/mx*100):0;
-    return `<div class="bar-row"><span class="bar-name">${c.n}</span><div class="bar-track"><div class="bar-fill ${colClass}" style="width:${w}%"></div></div><span class="bar-num">${att}</span></div>`;
+  const mxA=Math.max(...cA.map(c=>Math.round(c.v*sf)));
+  const mxB=Math.max(...cB.map(c=>Math.round(c.v*sf)));
+  const mkR=(arr,cls,mx)=>arr.map(c=>{
+    const att=Math.round(c.v*sf),w=mx>0?Math.round(att/mx*100):0;
+    return `<div class="barr"><span class="barn">${c.n}</span><div class="bart"><div class="barf ${cls}" style="width:${w}%"></div></div><span class="bnum">${att}</span></div>`;
   }).join('');
-  document.getElementById('tabellaDettaglio').innerHTML=`
-    <div><div class="tab-party-label" style="color:var(--red)">Partito A — scenario ${scen.label.replace('.',',')}</div>${makeRows(cA,'var(--red)','red',maxA)}</div>
-    <div><div class="tab-party-label" style="color:var(--blue)">Partito B — scenario ${scen.label.replace('.',',')}</div>${makeRows(cB,'var(--blue)','blue',maxB)}</div>`;
+  const lA=document.getElementById('nomeLA').value||'Lista A';
+  const lB=document.getElementById('nomeLB').value||'Lista B';
+  document.getElementById('tabD').innerHTML=`
+    <div><div class="tpl" style="color:var(--red)">${lA}</div>${mkR(cA,'r',mxA)}</div>
+    <div><div class="tpl" style="color:var(--blue)">${lB}</div>${mkR(cB,'b',mxB)}</div>`;
+
+  renderTabScen();
 }
 
-document.getElementById('sigma').addEventListener('input',function(){
-  document.getElementById('sigmaLabel').textContent=this.value+'%';
-});
-document.getElementById('scenario').addEventListener('change',function(){
-  buildChartScenari();
-  document.getElementById('tabellaDettaglio').innerHTML='<div style="font-size:13px;color:var(--muted);grid-column:1/-1;">Clicca "Simula" per aggiornare il dettaglio.</div>';
-});
-document.getElementById('btnSimula').addEventListener('click',eseguiSimulazione);
+/* ── INIT ── */
+ricalcola();
 renderListe();
-buildChartScenari();
 </script>
 </body>
 </html>
