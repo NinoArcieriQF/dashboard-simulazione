@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elezioni Cammarata — Dashboard Simulazione</title>
+<meta name="description" content="Analisi probabilistica e simulazione Monte Carlo delle elezioni comunali di Cammarata (AG). Dashboard interattiva con scenari di affluenza e previsioni.">
+<link rel="canonical" href="https://ninoarcieriQF.github.io/dashboard-simulazione/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0c1b33;
+  --cream:#f9f8f4;
+  --paper:#ffffff;
+  --border:#e2ddd6;
+  --muted:#6b6560;
+  --text:#1a1a1a;
+  --red:#b83232;
+  --blue:#1a6eb5;
+  --red-light:#fdf2f2;
+  --blue-light:#f0f5fb;
+  --gold:#c9a84c;
+  --ff-title:'Playfair Display',Georgia,serif;
+  --ff-body:'DM Sans',system-ui,sans-serif;
+}
+body{font-family:var(--ff-body);background:var(--cream);color:var(--text);line-height:1.6;font-size:16px;}
+a{color:inherit;text-decoration:none;}
+
+/* TOPBAR */
+.topbar{background:var(--navy);color:#a8b8cc;font-size:12px;font-weight:300;letter-spacing:.04em;padding:6px 0;text-align:center;}
+.topbar span{color:#e8e0d0;}
+
+/* HEADER */
+header{background:var(--navy);border-bottom:3px solid var(--gold);padding:1.5rem 0 1.2rem;}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:1.25rem;}
+.comune-badge{width:52px;height:52px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.comune-badge svg{width:28px;height:28px;fill:#0c1b33;}
+.header-text{}
+.header-text .label{font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;}
+.header-text h1{font-family:var(--ff-title);font-size:1.7rem;font-weight:600;color:#ffffff;line-height:1.1;margin-top:2px;}
+.header-text .sub{font-size:13px;color:#8da0b8;margin-top:3px;}
+.header-right{margin-left:auto;text-align:right;}
+.header-right .tag{display:inline-block;background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.35);border-radius:4px;font-size:11px;font-weight:500;letter-spacing:.06em;padding:4px 10px;text-transform:uppercase;}
+
+/* NAV */
+nav{background:var(--paper);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:0;}
+nav a{font-size:13px;font-weight:500;color:var(--muted);padding:13px 18px 11px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+nav a:hover,nav a.active{color:var(--text);border-bottom-color:var(--navy);}
+
+/* CONTAINER */
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem;}
+
+/* HERO */
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border);}
+.hero-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;}
+.hero h2{font-family:var(--ff-title);font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--text);max-width:720px;}
+.hero .hero-desc{font-size:15px;color:var(--muted);margin-top:.8rem;max-width:620px;line-height:1.7;}
+.disclaimer{margin-top:1rem;display:inline-flex;align-items:center;gap:6px;background:#fff8e6;border:1px solid #e8d48a;border-radius:5px;padding:6px 12px;font-size:12px;color:#7a6520;}
+
+/* STATS ROW */
+.stats-row{padding:2rem 0;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;border-bottom:1px solid var(--border);}
+.stat-card{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.25rem;}
+.stat-card .sc-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:.35rem;}
+.stat-card .sc-value{font-family:var(--ff-title);font-size:2rem;font-weight:700;color:var(--text);line-height:1;}
+.stat-card .sc-note{font-size:12px;color:var(--muted);margin-top:.3rem;}
+
+/* SECTION */
+.section{padding:2.5rem 0;border-bottom:1px solid var(--border);}
+.section-title{font-family:var(--ff-title);font-size:1.5rem;font-weight:600;margin-bottom:.35rem;}
+.section-subtitle{font-size:14px;color:var(--muted);margin-bottom:1.5rem;}
+
+/* CANDIDATI */
+.candidati-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.partito-card{background:var(--paper);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.partito-header{padding:.9rem 1.25rem;display:flex;align-items:center;gap:10px;}
+.partito-header.red{background:var(--red-light);border-bottom:3px solid var(--red);}
+.partito-header.blue{background:var(--blue-light);border-bottom:3px solid var(--blue);}
+.partito-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.partito-dot.red{background:var(--red);}
+.partito-dot.blue{background:var(--blue);}
+.partito-name{font-weight:500;font-size:15px;}
+.partito-sindaco{margin-left:auto;font-size:13px;color:var(--muted);}
+.candidati-list{padding:1rem 1.25rem;}
+.cand-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.cand-row:last-child{border-bottom:none;}
+.cand-row .cand-name{flex:1;font-weight:400;}
+.cand-row.capilista .cand-name{font-weight:500;}
+.cand-row .cand-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;}
+.cand-badge.sindaco{background:#f0f0f0;color:#555;}
+.cand-row input[type=number]{width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:13px;font-family:var(--ff-body);text-align:right;background:var(--cream);color:var(--text);}
+.cand-row input[type=number]:focus{outline:2px solid var(--navy);border-color:transparent;}
+.partito-tot{padding:.75rem 1.25rem;background:var(--cream);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;}
+.partito-tot span:last-child{font-weight:500;color:var(--text);}
+
+/* SIMULAZIONE */
+.sim-controls{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.25rem;display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:end;margin-bottom:1.25rem;}
+.ctrl-group label{display:block;font-size:13px;color:var(--muted);font-weight:500;margin-bottom:6px;}
+.ctrl-group select,.ctrl-group input[type=range]{width:100%;}
+.ctrl-group select{border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:14px;font-family:var(--ff-body);background:var(--cream);color:var(--text);}
+.ctrl-group select:focus{outline:2px solid var(--navy);}
+.ctrl-group input[type=range]{accent-color:var(--navy);margin-top:2px;}
+.btn-sim{background:var(--navy);color:#ffffff;border:none;border-radius:7px;padding:0 1.5rem;height:40px;font-size:14px;font-weight:500;font-family:var(--ff-body);cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.btn-sim:hover{opacity:.85;}
+
+.prob-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem;}
+.prob-card{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;}
+.prob-card .pc-label{font-size:12px;color:var(--muted);margin-bottom:.3rem;}
+.prob-card .pc-value{font-family:var(--ff-title);font-size:2rem;font-weight:700;line-height:1;}
+.pc-value.red{color:var(--red);}
+.pc-value.blue{color:var(--blue);}
+
+.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:1.25rem;margin-bottom:1.25rem;}
+.chart-box{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.chart-box h4{font-size:14px;font-weight:500;margin-bottom:3px;}
+.chart-box .ch-sub{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.chart-legend{display:flex;gap:14px;margin-bottom:10px;font-size:12px;color:var(--muted);}
+.chart-legend span{display:flex;align-items:center;gap:4px;}
+.leg-dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
+
+.tabella-dettaglio{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.tabella-dettaglio h4{font-size:14px;font-weight:500;margin-bottom:12px;}
+.tab-inner{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.tab-party-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;}
+.bar-name{min-width:80px;color:var(--text);}
+.bar-track{flex:1;height:6px;background:var(--cream);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;}
+.bar-fill.red{background:var(--red);}
+.bar-fill.blue{background:var(--blue);}
+.bar-num{min-width:38px;text-align:right;color:var(--muted);font-size:12px;}
+
+/* FOOTER */
+footer{background:var(--navy);color:#7a8fa3;padding:2rem 0;margin-top:3rem;font-size:13px;}
+footer .foot-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;}
+footer .foot-note{max-width:600px;line-height:1.6;}
+footer .foot-link{color:var(--gold);font-weight:500;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .candidati-grid{grid-template-columns:1fr;}
+  .sim-controls{grid-template-columns:1fr;}.prob-row{grid-template-columns:1fr 1fr;}
+  .charts-row{grid-template-columns:1fr;}
+  .tab-inner{grid-template-columns:1fr;}
+  .hero h2{font-size:1.8rem;}
+  .header-right{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">Analisi non ufficiale · Dati aggiornati al <span>Maggio 2026</span> · Comune di Cammarata (AG)</div>
+
+<header>
+  <div class="header-inner">
+    <div class="comune-badge">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="header-text">
+      <div class="label">Elezioni Comunali · Sicilia</div>
+      <h1>Cammarata (AG)</h1>
+      <div class="sub">Provincia di Agrigento · 4.869 elettori iscritti</div>
+    </div>
+    <div class="header-right">
+      <div class="tag">Simulazione Monte Carlo</div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#simulazione" class="active">Simulazione</a>
+    <a href="#candidati">Candidati</a>
+    <a href="#scenari">Scenari</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <section class="hero">
+    <div class="hero-label">Analisi probabilistica · Elezioni comunali</div>
+    <h2>Chi vincerà il Comune di Cammarata?</h2>
+    <p class="hero-desc">Simulazione statistica basata su 10.000 scenari generati con metodo Monte Carlo. I voti di ciascun candidato sono modellati come variabili aleatorie con distribuzione normale. Aggiorna le stime e simula in tempo reale.</p>
+    <div class="disclaimer">
+      ⚠ Analisi statistica non ufficiale — i dati inseriti sono stime. Nessuna affiliazione con il Comune o i partiti.
+    </div>
+  </section>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="sc-label">Elettori iscritti</div>
+      <div class="sc-value">4.869</div>
+      <div class="sc-note">Comune di Cammarata</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Liste in competizione</div>
+      <div class="sc-value">2</div>
+      <div class="sc-note">Partito A vs Partito B</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Bianche / nulle stimate</div>
+      <div class="sc-value">2,91%</div>
+      <div class="sc-note">Stima storica</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Scenari simulati</div>
+      <div class="sc-value">10K</div>
+      <div class="sc-note">5 fasce di affluenza</div>
+    </div>
+  </div>
+
+  <!-- CANDIDATI -->
+  <section class="section" id="candidati">
+    <h3 class="section-title">Le liste</h3>
+    <p class="section-subtitle">Modifica i voti stimati per aggiornare la simulazione. I valori rappresentano le aspettative di voto per singolo candidato.</p>
+    <div class="candidati-grid">
+
+      <div class="partito-card">
+        <div class="partito-header red">
+          <div class="partito-dot red"></div>
+          <span class="partito-name">Partito A</span>
+          <!-- SOSTITUISCI con il vero nome della lista -->
+          <span class="partito-sindaco">Candidato sindaco: Viola</span>
+        </div>
+        <div class="candidati-list" id="listA"></div>
+        <div class="partito-tot"><span>Voti stimati totali</span><span id="totA">1.850</span></div>
+      </div>
+
+      <div class="partito-card">
+        <div class="partito-header blue">
+          <div class="partito-dot blue"></div>
+          <span class="partito-name">Partito B</span>
+          <!-- SOSTITUISCI con il vero nome della lista -->
+          <span class="partito-sindaco">Candidato sindaco: Giuliano</span>
+        </div>
+        <div class="candidati-list" id="listB"></div>
+        <div class="partito-tot"><span>Voti stimati totali</span><span id="totB">1.950</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SIMULAZIONE -->
+  <section class="section" id="simulazione">
+    <h3 class="section-title">Simulazione probabilistica</h3>
+    <p class="section-subtitle">Monte Carlo con rumore gaussiano sui voti di ciascun candidato. Scegli lo scenario di affluenza e il grado di incertezza.</p>
+
+    <div class="sim-controls">
+      <div class="ctrl-group">
+        <label>Scenario affluenza</label>
+        <select id="scenario">
+          <option value="0">Minima — 70% (quota 1.656)</option>
+          <option value="1">Intermedia — 72,5% (quota 1.715)</option>
+          <option value="2" selected>Media — 75% (quota 1.774)</option>
+          <option value="3">Intermedia — 77,5% (quota 1.833)</option>
+          <option value="4">Massima — 80% (quota 1.892)</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label>Incertezza σ: <strong id="sigmaLabel">12%</strong></label>
+        <input type="range" id="sigma" min="5" max="30" value="12" step="1">
+      </div>
+      <button class="btn-sim" id="btnSimula">Simula 10.000 scenari</button>
+    </div>
+
+    <div class="prob-row">
+      <div class="prob-card"><div class="pc-label">P(vittoria A)</div><div class="pc-value red" id="probA">—</div></div>
+      <div class="prob-card"><div class="pc-label">P(vittoria B)</div><div class="pc-value blue" id="probB">—</div></div>
+      <div class="prob-card"><div class="pc-label">Vantaggio atteso</div><div class="pc-value" id="vantaggio" style="color:var(--text)">—</div></div>
+      <div class="prob-card"><div class="pc-label">Quota vittoria</div><div class="pc-value" id="quotaVitt" style="color:var(--text);font-size:1.6rem">—</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-box">
+        <h4>Distribuzione differenza voti A − B</h4>
+        <div class="ch-sub">Da 10.000 simulazioni · positivo = A avanza · negativo = B avanza</div>
+        <div class="chart-legend">
+          <span><span class="leg-dot" style="background:var(--blue)"></span>B avanza</span>
+          <span><span class="leg-dot" style="background:var(--red)"></span>A avanza</span>
+        </div>
+        <div style="position:relative;width:100%;height:220px;">
+          <canvas id="chartDiff" role="img" aria-label="Istogramma della differenza voti A meno B da simulazione Monte Carlo">Differenza voti simulata.</canvas>
+        </div>
+      </div>
+      <div class="chart-box" id="scenari">
+        <h4>Voti attesi per scenario</h4>
+        <div class="ch-sub">Valore atteso senza rumore + quota vittoria</div>
+        <div class="chart-legend">
+          <span><span class="leg-dot" style="background:var(--red)"></span>A</span>
+          <span><span class="leg-dot" style="background:var(--blue)"></span>B</span>
+          <span><span style="width:14px;height:2px;background:#888;display:inline-block;"></span>Quota</span>
+        </div>
+        <div style="position:relative;width:100%;height:220px;">
+          <canvas id="chartScenari" role="img" aria-label="Voti attesi per i 5 scenari di affluenza con quota di vittoria">Scenari affluenza.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabella-dettaglio">
+      <h4>Dettaglio per candidato — scenario selezionato</h4>
+      <div class="tab-inner" id="tabellaDettaglio">
+        <div style="font-size:13px;color:var(--muted);grid-column:1/-1;">Clicca "Simula" per visualizzare il dettaglio per candidato.</div>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-note">
+      Analisi statistica non ufficiale realizzata a scopo informativo. I dati inseriti sono stime e non rappresentano risultati elettorali certificati. Il modello utilizza il metodo Monte Carlo con distribuzione normale (Box-Muller). Fonte codice: <a class="foot-link" href="https://github.com/NinoArcieriQF/dashboard-simulazione" target="_blank">github.com/NinoArcieriQF/dashboard-simulazione</a>
+    </div>
+    <div>Comune di Cammarata (AG) · Sicilia</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SCENARI=[
+  {label:'70%',validi:3309.3,quota:1655.65},
+  {label:'72.5%',validi:3427.025,quota:1714.5125},
+  {label:'75%',validi:3545.75,quota:1773.875},
+  {label:'77.5%',validi:3663.475,quota:1832.7375},
+  {label:'80%',validi:3782.2,quota:1892.1}
+];
+let cA=[{n:'Viola',v:550},{n:'Tomasino',v:350},{n:'Loria',v:350},{n:'Reina',v:300},{n:'Tuzzolino',v:250},{n:'Madonia',v:50}];
+let cB=[{n:'Giuliano',v:600},{n:'Giambrone',v:400},{n:'Cigno',v:400},{n:'Gaetano',v:300},{n:'Martiaddu',v:200},{n:'Rappisi',v:50}];
+let chartDiffInst=null,chartScenInst=null;
+
+function gauss(m,s){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function sumA(){return cA.reduce((s,c)=>s+c.v,0);}
+function sumB(){return cB.reduce((s,c)=>s+c.v,0);}
+
+function renderListe(){
+  ['A','B'].forEach(p=>{
+    const arr=p==='A'?cA:cB;
+    const col=p==='A'?'var(--red)':'var(--blue)';
+    document.getElementById('list'+p).innerHTML=arr.map((c,i)=>`
+      <div class="cand-row${i===0?' capilista':''}">
+        <span class="cand-name">${c.n}</span>
+        ${i===0?'<span class="cand-badge sindaco">Sindaco</span>':''}
+        <input type="number" min="0" max="2000" step="10" value="${c.v}"
+          oninput="aggVoti('${p}',${i},this.value)">
+      </div>`).join('');
+  });
+  aggTot();
+}
+
+function aggVoti(p,i,val){
+  const v=Math.max(0,parseInt(val)||0);
+  if(p==='A')cA[i].v=v;else cB[i].v=v;
+  aggTot();buildChartScenari();
+}
+
+function aggTot(){
+  document.getElementById('totA').textContent=sumA().toLocaleString('it-IT');
+  document.getElementById('totB').textContent=sumB().toLocaleString('it-IT');
+}
+
+function buildChartScenari(){
+  const tA=sumA(),tB=sumB(),tot=tA+tB;
+  const vA=SCENARI.map(s=>Math.round(tA*s.validi/tot));
+  const vB=SCENARI.map(s=>Math.round(tB*s.validi/tot));
+  const qArr=SCENARI.map(s=>Math.round(s.quota));
+  const ctx=document.getElementById('chartScenari').getContext('2d');
+  if(chartScenInst)chartScenInst.destroy();
+  chartScenInst=new Chart(ctx,{
+    data:{labels:SCENARI.map(s=>s.label),datasets:[
+      {type:'bar',label:'A',data:vA,backgroundColor:'#b83232',borderWidth:0},
+      {type:'bar',label:'B',data:vB,backgroundColor:'#1a6eb5',borderWidth:0},
+      {type:'line',label:'Quota',data:qArr,borderColor:'#888',borderWidth:2,pointRadius:3,fill:false,tension:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>i.dataset.label+': '+i.raw.toLocaleString('it-IT')}}},
+      scales:{
+        x:{ticks:{font:{size:11}},grid:{display:false}},
+        y:{ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,.06)'}}
+      }}
+  });
+}
+
+function eseguiSimulazione(){
+  const si=parseInt(document.getElementById('scenario').value);
+  const sigma=parseInt(document.getElementById('sigma').value)/100;
+  const scen=SCENARI[si];
+  const tot=sumA()+sumB();
+  const sf=scen.validi/tot;
+  const N=10000;
+  let wA=0,wB=0;
+  const diffs=[],arrA=[],arrB=[];
+  for(let i=0;i<N;i++){
+    let sA=0,sB=0;
+    cA.forEach(c=>{const b=c.v*sf;sA+=Math.max(0,gauss(b,sigma*b));});
+    cB.forEach(c=>{const b=c.v*sf;sB+=Math.max(0,gauss(b,sigma*b));});
+    if(sA>scen.quota)wA++;else if(sB>scen.quota)wB++;
+    diffs.push(sA-sB);arrA.push(sA);arrB.push(sB);
+  }
+  const pA=(wA/N*100).toFixed(1),pB=(wB/N*100).toFixed(1);
+  const mA=arrA.reduce((a,b)=>a+b,0)/N,mB=arrB.reduce((a,b)=>a+b,0)/N;
+  const diff=mA-mB;
+  document.getElementById('probA').textContent=pA+'%';
+  document.getElementById('probB').textContent=pB+'%';
+  const vel=document.getElementById('vantaggio');
+  vel.textContent=(diff>0?'+':'')+Math.round(diff)+' ('+(diff>0?'A':'B')+')';
+  vel.style.color=diff>0?'var(--red)':'var(--blue)';
+  document.getElementById('quotaVitt').textContent=Math.round(scen.quota).toLocaleString('it-IT');
+  const bSize=30,buckets={};
+  diffs.forEach(d=>{const b=Math.floor(d/bSize)*bSize;buckets[b]=(buckets[b]||0)+1;});
+  const keys=Object.keys(buckets).map(Number).sort((a,b)=>a-b);
+  const ctx=document.getElementById('chartDiff').getContext('2d');
+  if(chartDiffInst)chartDiffInst.destroy();
+  chartDiffInst=new Chart(ctx,{type:'bar',
+    data:{labels:keys.map(k=>String(k)),datasets:[{data:keys.map(k=>buckets[k]),
+      backgroundColor:keys.map(k=>k>=0?'#b83232':'#1a6eb5'),borderWidth:0,barPercentage:1,categoryPercentage:.95}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>'diff: '+i[0].label+' voti',label:i=>i.raw+' sim. ('+((i.raw/N)*100).toFixed(1)+'%)'}}},
+      scales:{x:{ticks:{font:{size:10},maxTicksLimit:12},grid:{display:false}},y:{ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.06)'}}}}
+  });
+  buildTabella(sf,scen);
+}
+
+function buildTabella(sf,scen){
+  const maxA=Math.max(...cA.map(c=>Math.round(c.v*sf)));
+  const maxB=Math.max(...cB.map(c=>Math.round(c.v*sf)));
+  const makeRows=(arr,col,colClass,mx)=>arr.map(c=>{
+    const att=Math.round(c.v*sf);
+    const w=mx>0?Math.round(att/mx*100):0;
+    return `<div class="bar-row"><span class="bar-name">${c.n}</span><div class="bar-track"><div class="bar-fill ${colClass}" style="width:${w}%"></div></div><span class="bar-num">${att}</span></div>`;
+  }).join('');
+  document.getElementById('tabellaDettaglio').innerHTML=`
+    <div><div class="tab-party-label" style="color:var(--red)">Partito A — scenario ${scen.label.replace('.',',')}</div>${makeRows(cA,'var(--red)','red',maxA)}</div>
+    <div><div class="tab-party-label" style="color:var(--blue)">Partito B — scenario ${scen.label.replace('.',',')}</div>${makeRows(cB,'var(--blue)','blue',maxB)}</div>`;
+}
+
+document.getElementById('sigma').addEventListener('input',function(){
+  document.getElementById('sigmaLabel').textContent=this.value+'%';
+});
+document.getElementById('scenario').addEventListener('change',function(){
+  buildChartScenari();
+  document.getElementById('tabellaDettaglio').innerHTML='<div style="font-size:13px;color:var(--muted);grid-column:1/-1;">Clicca "Simula" per aggiornare il dettaglio.</div>';
+});
+document.getElementById('btnSimula').addEventListener('click',eseguiSimulazione);
+renderListe();
+buildChartScenari();
+</script>
+</body>
+</html>
